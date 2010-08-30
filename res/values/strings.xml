@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hello">Hello World, FeedStats!</string>
+    <string name="get">Get</string>
+    <string name="feed_url">Feed Url:</string>
     <string name="app_name">FeedStats</string>
 </resources>
