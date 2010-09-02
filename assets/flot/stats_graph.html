@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Entry Graph</title>
+<link type="text/css" href="stats_graph.css" rel="stylesheet" />
+<script src="jquery.min.js"></script>
+<script src="jquery.flot.min.js"></script>
+<script id="source" language="javascript" type="text/javascript">
+	
+var gdata; //global variable to store the data
+
+$(document).ready(function () {
+	document.getElementById('graphTitle').innerHTML = window.testhandler.getGraphTitle();
+	
+	window.testhandler.loadGraph();	
+	
+	// Full period
+	$('#lastYear').click(function () {
+		$.plot($("#graphHolder"), gdata, { xaxis: { mode: "time" } });
+	});
+	
+	// Last month
+	$('#lastMonth').click(function () {
+		var lastMonth = new Date();
+		lastMonth.setDate(lastMonth.getDate() - 30);
+		
+        $.plot($("#graphHolder"), gdata, {
+            xaxis: {
+                mode: "time",
+                min: (lastMonth).getTime(),
+                max: (new Date()).getTime()
+            }
+        });		
+	});
+	
+	// Last week
+	$('#lastWeek').click(function () {
+		var lastWeek = new Date();
+		lastWeek.setDate(lastWeek.getDate() - 7);
+		
+        $.plot($("#graphHolder"), gdata, {
+            xaxis: {
+                mode: "time",
+                min: (lastWeek).getTime(),
+                max: (new Date()).getTime()
+            }
+        });		
+	});
+});
+	
+/**
+ * Draw the graph. This is a callback which will be called by JavaWorld
+ * 
+ * @param {Object} gdata
+ */	
+function GotGraph(data) {	
+	gdata = data;
+	$.plot($("#graphHolder"), gdata, { xaxis: { mode: "time" } });	
+}
+</script>
+
+</head>
+<body>
+<h1 id="graphTitle"></h1>
+<div id="graphHolder"></div>
+<button id="lastYear">Last year</button>
+<button id="lastMonth">Last Month</button>
+<button id="lastWeek">Last Week</button>
+</body>
+</html>

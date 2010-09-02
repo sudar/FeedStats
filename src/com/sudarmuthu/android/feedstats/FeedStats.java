@@ -21,11 +21,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.sudarmuthu.android.feedstats.utils.FeedStatsHandler;
+import com.sudarmuthu.android.feedstats.utils.StatsGraphHandler;
 
 /**
  * The main activity class
@@ -36,7 +38,8 @@ import com.sudarmuthu.android.feedstats.utils.FeedStatsHandler;
 public class FeedStats extends Activity {
     private EditText tFeedUrl;
 	private Context  mContext;
-	private Map<String, String> stats = new HashMap<String, String>();
+	private Map<String, String> mStats = new HashMap<String, String>();
+	private StatsGraphHandler mGraphHandler;
 	
 	private static final String FEEDBURNER_API_URL = "https://feedburner.google.com/awareness/1.0/GetFeedData?uri=";
 
@@ -69,7 +72,7 @@ public class FeedStats extends Activity {
 				Calendar c = Calendar.getInstance();
 				c.add(Calendar.DATE, -1); //we should start with previous day
 				String endDate = c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE);
-				c.add(Calendar.DATE, -7);
+				c.add(Calendar.DATE, -30);
 				String startDate = c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE);
 				
 				// get data from feedburner
@@ -83,15 +86,15 @@ public class FeedStats extends Activity {
 					/* Get the XMLReader of the SAXParser we created. */
 					XMLReader xr = sp.getXMLReader();
 					/* Create a new ContentHandler and apply it to the XML-Reader*/
-					FeedStatsHandler feedStatsHandler = new FeedStatsHandler(stats);
+					FeedStatsHandler feedStatsHandler = new FeedStatsHandler(mStats);
 					xr.setContentHandler(feedStatsHandler);
 
 					/* Parse the xml-data from our URL. */
 					xr.parse(new InputSource(url.openStream()));
 					/* Parsing has finished. */ 
 					
-					stats = feedStatsHandler.getStats();
-					Log.d(this.getClass().getSimpleName(), stats.size() + "");
+					mStats = feedStatsHandler.getStats();
+					Log.d(this.getClass().getSimpleName(), mStats.size() + "");
 					
 				} catch (MalformedURLException e) {
 					handleError(e);
@@ -105,10 +108,28 @@ public class FeedStats extends Activity {
 				
 				
 				//Show the webview
+		        WebView wv = (WebView) findViewById(R.id.wv1);
+		        
+		        mGraphHandler = new StatsGraphHandler(wv, mStats);
+		        
+		        wv.getSettings().setJavaScriptEnabled(true);
+		        wv.addJavascriptInterface(mGraphHandler, "testhandler");
+		        wv.loadUrl("file:///android_asset/flot/stats_graph.html");
+		        
 			}
 		});
     }
 
+    /**
+     * When the activity is resumed
+     */
+	@Override
+	protected void onResume() {
+		super.onResume();
+//		mGraphHandler.loadGraph();
+	}
+
+    
 	/**
 	 * @param e
 	 */
