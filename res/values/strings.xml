@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="get">Get</string>
-    <string name="feed_url">Feed Url:</string>
+    <string name="feed_url">Enter Feed Url</string>
     <string name="app_name">FeedStats</string>
 <string name="feed_url_empty">Feed url is empty.</string>
 <string name="error">Something went wrong</string>

@@ -3,20 +3,22 @@
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 
-	<TableLayout android:id="@+id/TableLayout01" android:stretchColumns="1" 
-		android:layout_width="fill_parent" android:layout_height="wrap_content" >
-		<TableRow android:id="@+id/TableRow01" android:layout_width="fill_parent"
-			android:layout_height="wrap_content">
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="horizontal" android:layout_width="fill_parent"
+		android:layout_height="fill_parent" android:layout_weight="8">
 
-			<TextView android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:text="@string/feed_url" />
-			<EditText android:layout_height="wrap_content" android:id="@+id/feedUrl" android:layout_width="fill_parent" android:text="http://"></EditText>
-			<Button android:layout_width="wrap_content"
-				android:layout_height="wrap_content" android:id="@+id/getGraph"
-				android:layout_gravity="right" android:text="@string/get"></Button>
+		<EditText android:layout_height="wrap_content"
+			android:layout_width="fill_parent" android:hint="@string/feed_url"
+			android:id="@+id/feedUrl" android:textSize="14dp" android:inputType="textUri"
+			android:layout_weight="1">
+		</EditText>
 
-		</TableRow>
-	</TableLayout>
+		<Button android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:id="@+id/getGraph"
+			android:layout_gravity="right" android:text="@string/get"
+			android:layout_weight="0"></Button>
+	</LinearLayout>
+	
 	<WebView android:id="@+id/wv1" android:layout_height="wrap_content"
-		android:layout_width="fill_parent" />
+		android:layout_width="fill_parent" android:layout_weight="1" />
 </LinearLayout>
