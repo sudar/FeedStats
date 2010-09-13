@@ -5,7 +5,7 @@ package com.sudarmuthu.android.feedstats.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.json.JSONArray;
@@ -43,25 +43,24 @@ public class StatsGraphHandler {
 	/**
 	 * Load the default graph
 	 */
-	@SuppressWarnings("unchecked")
 	public void loadGraph() {
 		JSONArray data = new JSONArray();
-		
-		Iterator it = mStats.entrySet().iterator();
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		
-		while (it.hasNext()) {
+		Object[] key = mStats.keySet().toArray();
+		Arrays.sort(key); // keys should be sorted, otherwise the graph will not work properly.
+		
+		for (int i =0; i < key.length; i++) {
 			JSONArray entry = new JSONArray();
-			Map.Entry<String, String> pairs = (Map.Entry<String, String>)it.next();
 			
 			try {
-				entry.put(formatter.parse(pairs.getKey() + " 00:00:00").getTime());
+				entry.put(formatter.parse(key[i] + " 00:00:00").getTime());
 			} catch (ParseException e) {
 				Log.d(this.getClass().getSimpleName(), "Some problem in parsing dates");
 				e.printStackTrace();
 			}
 			
-			entry.put(Integer.parseInt(pairs.getValue()));
+			entry.put(Integer.parseInt(mStats.get(key[i])));
 			data.put(entry);
 		}
 		
@@ -86,6 +85,7 @@ public class StatsGraphHandler {
 			arr.put(result);
 			
 		// return arr.toString(); //This _WILL_ return the data in a good looking JSON string, but if you pass it straight into the Flot Plot method, it will not work!
+			Log.d(this.getClass().getSimpleName(), arr.toString());
 		mAppView.loadUrl("javascript:GotGraph(" + arr.toString() + ")"); // this callback works!
 	}
 
