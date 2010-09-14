@@ -17,6 +17,7 @@ import org.xml.sax.XMLReader;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -38,7 +39,6 @@ import com.sudarmuthu.android.feedstats.utils.StatsGraphHandler;
 public class FeedStats extends Activity {
     private EditText tFeedUrl;
 	private Context  mContext;
-	private Map<String, String> mStats = new HashMap<String, String>();
 	private StatsGraphHandler mGraphHandler;
 	
 	private static final String FEEDBURNER_API_URL = "https://feedburner.google.com/awareness/1.0/GetFeedData?uri=";
@@ -67,55 +67,7 @@ public class FeedStats extends Activity {
 					return;
 				}
 				
-				//Add date query
-				
-				Calendar c = Calendar.getInstance();
-				c.add(Calendar.DATE, -1); //we should start with previous day
-				String endDate = c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE);
-				c.add(Calendar.DATE, -30);
-				String startDate = c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE);
-				
-				// get data from feedburner
-				try {
-					URL url = new URL(FEEDBURNER_API_URL + feedUrl + "&dates=" + startDate + "," + endDate);
-					
-					/* Get a SAXParser from the SAXPArserFactory. */
-					SAXParserFactory spf = SAXParserFactory.newInstance();
-					SAXParser sp = spf.newSAXParser();
-
-					/* Get the XMLReader of the SAXParser we created. */
-					XMLReader xr = sp.getXMLReader();
-					/* Create a new ContentHandler and apply it to the XML-Reader*/
-					FeedStatsHandler feedStatsHandler = new FeedStatsHandler(mStats);
-					xr.setContentHandler(feedStatsHandler);
-
-					/* Parse the xml-data from our URL. */
-					xr.parse(new InputSource(url.openStream()));
-					/* Parsing has finished. */ 
-					
-					mStats = feedStatsHandler.getStats();
-					Log.d(this.getClass().getSimpleName(), mStats.size() + "");
-					
-				} catch (MalformedURLException e) {
-					handleError(e);
-				} catch (IOException e) {
-					handleError(e);
-				} catch (ParserConfigurationException e) {
-					handleError(e);
-				} catch (SAXException e) {
-					handleError(e);
-				}
-				
-				
-				//Show the webview
-		        WebView wv = (WebView) findViewById(R.id.wv1);
-		        
-		        mGraphHandler = new StatsGraphHandler(wv, mStats);
-		        
-		        wv.getSettings().setJavaScriptEnabled(true);
-		        wv.addJavascriptInterface(mGraphHandler, "testhandler");
-		        wv.loadUrl("file:///android_asset/flot/stats_graph.html");
-		        
+		        new GetStatsTask().execute(feedUrl);
 			}
 		});
     }
@@ -131,10 +83,78 @@ public class FeedStats extends Activity {
 
     
 	/**
+	 * Print Error message
+	 * 
 	 * @param e
 	 */
 	private void handleError(Exception e) {
 		e.printStackTrace();
 		Toast.makeText(mContext, mContext.getResources().getString(R.string.error) + "-" + e.getMessage(), Toast.LENGTH_LONG);
+	}
+	
+	/**
+	 * Task to fetch and parse feeds
+	 * 
+	 * @author "Sudar Muthu (sudarm@)"
+	 *
+	 */
+	private class GetStatsTask extends AsyncTask<String, Void, Map<String, String>> {
+		protected Map<String, String> doInBackground(String... feedUrl) {
+			Map<String, String> stats = new HashMap<String, String>();
+			
+			//Add date query
+			
+			Calendar c = Calendar.getInstance();
+			c.add(Calendar.DATE, -1); //we should start with previous day
+			String endDate = c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE);
+			c.add(Calendar.DATE, -30);
+			String startDate = c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1) + "-" + c.get(Calendar.DATE);
+			
+			// get data from feedburner
+			try {
+				URL url = new URL(FEEDBURNER_API_URL + feedUrl[0] + "&dates=" + startDate + "," + endDate);
+				
+				/* Get a SAXParser from the SAXPArserFactory. */
+				SAXParserFactory spf = SAXParserFactory.newInstance();
+				SAXParser sp = spf.newSAXParser();
+
+				/* Get the XMLReader of the SAXParser we created. */
+				XMLReader xr = sp.getXMLReader();
+				/* Create a new ContentHandler and apply it to the XML-Reader*/
+				FeedStatsHandler feedStatsHandler = new FeedStatsHandler(stats);
+				xr.setContentHandler(feedStatsHandler);
+
+				/* Parse the xml-data from our URL. */
+				xr.parse(new InputSource(url.openStream()));
+				/* Parsing has finished. */ 
+				
+				stats = feedStatsHandler.getStats();
+				Log.d(this.getClass().getSimpleName(), stats.size() + "");
+				
+			} catch (MalformedURLException e) {
+				handleError(e);
+			} catch (IOException e) {
+				handleError(e);
+			} catch (ParserConfigurationException e) {
+				handleError(e);
+			} catch (SAXException e) {
+				handleError(e);
+			}
+			
+			return stats;
+			
+		}
+		
+		protected void onPostExecute(Map<String, String> stats) {
+			//Show the webview
+	        WebView wv = (WebView) findViewById(R.id.wv1);
+	        
+	        mGraphHandler = new StatsGraphHandler(wv, stats);
+	        
+	        wv.getSettings().setJavaScriptEnabled(true);
+	        wv.addJavascriptInterface(mGraphHandler, "testhandler");
+	        wv.loadUrl("file:///android_asset/flot/stats_graph.html");
+			
+		}
 	}
 }
