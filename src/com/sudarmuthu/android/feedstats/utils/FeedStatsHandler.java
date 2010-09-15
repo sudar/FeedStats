@@ -18,9 +18,9 @@ import android.util.Log;
  *
  */
 public class FeedStatsHandler extends DefaultHandler {
-    StringBuffer buff = null;
-    boolean buffering = false;
     private Map<String, String> stats;
+    private boolean isError = false;
+    private String errorMsg;
     
     public FeedStatsHandler(Map<String, String> stats) {
     	this.setStats(stats);
@@ -41,12 +41,22 @@ public class FeedStatsHandler extends DefaultHandler {
     @Override
     public void startElement(String namespaceURI, String localName, String qName, 
             Attributes atts) throws SAXException {
+    	
         if (localName.equals("entry")) {
         	String date = atts.getValue("date");
         	String count = atts.getValue("circulation");
         	stats.put(date, count);
         	Log.d(this.getClass().getSimpleName(), date + ":" + count);
-        }   
+        } else if (localName.equals("rsp")) {
+        	String result = atts.getValue("stat");
+        	Log.d(this.getClass().getSimpleName(), "Response: " + result);
+        	if (result.equalsIgnoreCase("fail")) {
+        		isError = true;
+        	}
+        } else if (localName.equals("err")) {
+        	isError = true;
+        	errorMsg = atts.getValue("msg");
+        }
     }
 
 	/**
@@ -61,23 +71,20 @@ public class FeedStatsHandler extends DefaultHandler {
 	 */
 	public Map<String, String> getStats() {
 		return stats;
-	} 
-    
-//    @Override
-//    public void characters(char ch[], int start, int length) {
-//        if(buffering) {
-//            buff.append(ch, start, length);
-//        }
-//    } 
-//    
-//    @Override
-//    public void endElement(String namespaceURI, String localName, String qName) 
-//    throws SAXException {
-//        if (localName.equals("entry")) {
-//            buffering = false; 
-//            String content = buff.toString();
-//            
-//            // Do something with the full text content that we've just parsed
-//        }
-//    }	
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isError() {
+		return isError;
+	}
+	
+	/**
+	 * Get the error message
+	 * @return
+	 */
+	public String getErrorMsg() {
+		return errorMsg;
+	}
 }

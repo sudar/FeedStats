@@ -37,7 +37,9 @@ import com.sudarmuthu.android.feedstats.utils.StatsGraphHandler;
  *
  */
 public class FeedStats extends Activity {
-    private EditText tFeedUrl;
+    private EditText mFeedUrl;
+    private Button mGetButton;
+    
 	private Context  mContext;
 	private StatsGraphHandler mGraphHandler;
 	
@@ -49,10 +51,11 @@ public class FeedStats extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        tFeedUrl = (EditText) findViewById(R.id.feedUrl);
+        mFeedUrl = (EditText) findViewById(R.id.feedUrl);
+        mGetButton = (Button) findViewById(R.id.getGraph);
         mContext = this;
         
-        tFeedUrl.setText("http://feeds.feedburner.com/SudarBlogs"); //for debugging
+        mFeedUrl.setText("http://feeds.feedburner.com/SudarBlogs"); //for debugging
         
         Button getGraph = (Button) findViewById(R.id.getGraph);
         getGraph.setOnClickListener(new OnClickListener() {
@@ -61,7 +64,7 @@ public class FeedStats extends Activity {
 			public void onClick(View v) {
 				//get the feed url and validate
 				
-				String feedUrl = tFeedUrl.getText().toString();
+				String feedUrl = mFeedUrl.getText().toString();
 				if (feedUrl == null || feedUrl.equals("http://") || feedUrl.equals("")) {
 					Toast.makeText(mContext, mContext.getResources().getString(R.string.feed_url_empty), Toast.LENGTH_SHORT).show();
 					return;
@@ -83,24 +86,28 @@ public class FeedStats extends Activity {
 
     
 	/**
-	 * Print Error message
-	 * 
-	 * @param e
-	 */
-	private void handleError(Exception e) {
-		e.printStackTrace();
-		Toast.makeText(mContext, mContext.getResources().getString(R.string.error) + "-" + e.getMessage(), Toast.LENGTH_LONG);
-	}
-	
-	/**
 	 * Task to fetch and parse feeds
 	 * 
 	 * @author "Sudar Muthu (sudarm@)"
 	 *
 	 */
 	private class GetStatsTask extends AsyncTask<String, Void, Map<String, String>> {
+		private String errorMsg;
+		
+		/**
+		 * Before the task is started
+		 */
+		@Override
+		protected void onPreExecute() {
+			mGetButton.setEnabled(false);
+		}
+
+		/**
+		 * Start the background process
+		 */
 		protected Map<String, String> doInBackground(String... feedUrl) {
 			Map<String, String> stats = new HashMap<String, String>();
+			FeedStatsHandler feedStatsHandler = new FeedStatsHandler(stats);
 			
 			//Add date query
 			
@@ -121,15 +128,18 @@ public class FeedStats extends Activity {
 				/* Get the XMLReader of the SAXParser we created. */
 				XMLReader xr = sp.getXMLReader();
 				/* Create a new ContentHandler and apply it to the XML-Reader*/
-				FeedStatsHandler feedStatsHandler = new FeedStatsHandler(stats);
 				xr.setContentHandler(feedStatsHandler);
 
 				/* Parse the xml-data from our URL. */
 				xr.parse(new InputSource(url.openStream()));
 				/* Parsing has finished. */ 
 				
-				stats = feedStatsHandler.getStats();
-				Log.d(this.getClass().getSimpleName(), stats.size() + "");
+				if (!feedStatsHandler.isError()) {
+					stats = feedStatsHandler.getStats();
+				} else {
+					errorMsg = feedStatsHandler.getErrorMsg();
+					stats = null;
+				}
 				
 			} catch (MalformedURLException e) {
 				handleError(e);
@@ -139,22 +149,44 @@ public class FeedStats extends Activity {
 				handleError(e);
 			} catch (SAXException e) {
 				handleError(e);
+			} catch (Exception e) {
+				handleError(e);
 			}
 			
 			return stats;
-			
+		}
+
+		/**
+		 * When the background process is complete
+		 */
+		protected void onPostExecute(Map<String, String> stats) {
+			if (stats != null && stats.size() > 0) {
+
+				// Show the webview
+				WebView wv = (WebView) findViewById(R.id.wv1);
+
+				mGraphHandler = new StatsGraphHandler(wv, stats);
+
+				wv.getSettings().setJavaScriptEnabled(true);
+				wv.addJavascriptInterface(mGraphHandler, "testhandler");
+				wv.loadUrl("file:///android_asset/flot/stats_graph.html");
+			} else {
+				//show error message
+				Toast.makeText(mContext, errorMsg, Toast.LENGTH_LONG).show();
+			}
+			mGetButton.setEnabled(true);			
 		}
 		
-		protected void onPostExecute(Map<String, String> stats) {
-			//Show the webview
-	        WebView wv = (WebView) findViewById(R.id.wv1);
-	        
-	        mGraphHandler = new StatsGraphHandler(wv, stats);
-	        
-	        wv.getSettings().setJavaScriptEnabled(true);
-	        wv.addJavascriptInterface(mGraphHandler, "testhandler");
-	        wv.loadUrl("file:///android_asset/flot/stats_graph.html");
-			
+		/**
+		 * Print Error message
+		 * 
+		 * @param e
+		 */
+		private void handleError(Exception e) {
+			Log.d(this.getClass().getSimpleName(), "Caught some exceiton");
+			e.printStackTrace();
+			Toast.makeText(mContext, mContext.getResources().getString(R.string.error) + "-" + e.getMessage(), Toast.LENGTH_LONG);
+			errorMsg = e.getMessage();
 		}
 	}
 }
