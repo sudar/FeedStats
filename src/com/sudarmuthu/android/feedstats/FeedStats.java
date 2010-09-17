@@ -16,6 +16,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -44,7 +46,8 @@ public class FeedStats extends Activity {
 	private StatsGraphHandler mGraphHandler;
 	
 	private static final String FEEDBURNER_API_URL = "https://feedburner.google.com/awareness/1.0/GetFeedData?uri=";
-
+	static final int PROGRESS_DIALOG = 0;
+	
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,12 +73,29 @@ public class FeedStats extends Activity {
 					return;
 				}
 				
+				//start the dialog
+				showDialog(PROGRESS_DIALOG);
 		        new GetStatsTask().execute(feedUrl);
 			}
 		});
     }
 
-    /**
+    /** Before the dialog is created
+     * 
+	 * @see android.app.Activity#onCreateDialog(int)
+	 */
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		switch(id) {
+        case PROGRESS_DIALOG:
+        	ProgressDialog dialog = ProgressDialog.show(mContext, "", getResources().getString(R.string.loading_msg), true);        	
+            return dialog;
+        default:
+            return null;
+        }
+	}
+
+	/**
      * When the activity is resumed
      */
 	@Override
@@ -160,6 +180,7 @@ public class FeedStats extends Activity {
 		 * When the background process is complete
 		 */
 		protected void onPostExecute(Map<String, String> stats) {
+			dismissDialog(PROGRESS_DIALOG);			
 			if (stats != null && stats.size() > 0) {
 
 				// Show the webview
