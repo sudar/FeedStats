@@ -16,13 +16,22 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.widget.Button;
@@ -47,6 +56,7 @@ public class FeedStats extends Activity {
 	
 	private static final String FEEDBURNER_API_URL = "https://feedburner.google.com/awareness/1.0/GetFeedData?uri=";
 	static final int PROGRESS_DIALOG = 0;
+	static final int ABOUT_DIALOG = 1;
 	
 	/** Called when the activity is first created. */
     @Override
@@ -90,9 +100,67 @@ public class FeedStats extends Activity {
         case PROGRESS_DIALOG:
         	ProgressDialog dialog = ProgressDialog.show(mContext, "", getResources().getString(R.string.loading_msg), true);        	
             return dialog;
+        case ABOUT_DIALOG:
+        	AlertDialog.Builder builder;
+        	Dialog dialog2;
+
+        	LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
+        	View layout = inflater.inflate(R.layout.about, (ViewGroup) findViewById(R.id.layout_root));
+
+			builder = new AlertDialog.Builder(mContext);
+			builder.setView(layout);
+			builder.setMessage("")
+		       .setPositiveButton(this.getString(R.string.ok), new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		        	   dialog.cancel();
+		           }
+		       });
+			
+			dialog2 = builder.create();
+			
+			View projectUrl = layout.findViewById(R.id.project_url);
+			projectUrl.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					//When the project url is clicked
+					Uri uri = Uri.parse(getString(R.string.about_project_url));
+					Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+					startActivity(intent);
+				}
+			});
+			
+			return dialog2;
         default:
             return null;
         }
+	}
+
+	/**
+	 * Create options menu
+	 * 
+	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu, menu);
+		return true;
+	}
+
+	/**
+	 * When the menu item is selected
+	 * 
+	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.about:
+			displayAboutBox();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	/**
@@ -101,14 +169,21 @@ public class FeedStats extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-//		mGraphHandler.loadGraph();
+		//TODO: Need to handle screen orientation changes properly.
 	}
 
+	/**
+	 * Display About box
+	 */
+    protected void displayAboutBox() {
+    	showDialog(ABOUT_DIALOG);
+//        startActivity(new Intent(this, About.class));
+    }
     
 	/**
 	 * Task to fetch and parse feeds
 	 * 
-	 * @author "Sudar Muthu (sudarm@)"
+	 * @author "Sudar Muthu"
 	 *
 	 */
 	private class GetStatsTask extends AsyncTask<String, Void, Map<String, String>> {

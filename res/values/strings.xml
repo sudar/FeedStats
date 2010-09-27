@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="about">About</string>
     <string name="get">Get</string>
     <string name="feed_url">Enter Feed Url</string>
     <string name="app_name">FeedStats</string>
 <string name="feed_url_empty">Feed url is empty.</string>
 <string name="error">Something went wrong</string>
 <string name="loading_msg">Fetching stats. Please wait...</string>
+<string name="about_text">FeedStats is a simple Android App which let\'s you to view the Feedburner subscriber stats of your blog\'s feed</string>
+<string name="about_version">1.0</string>
+<string name="about_copyright">All Rights reserved</string>
+<string name="about_author_email">sudar@sudarmuthu.com</string>
+<string name="about_project_url">http://sudarmuthu.com/android/</string>
+<string name="ok">Ok</string>
+<color name="blue">#0084E4</color>
 </resources>
