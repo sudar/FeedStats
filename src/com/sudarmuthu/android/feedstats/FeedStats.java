@@ -180,7 +180,6 @@ public class FeedStats extends Activity {
 		 * When the background process is complete
 		 */
 		protected void onPostExecute(Map<String, String> stats) {
-			dismissDialog(PROGRESS_DIALOG);			
 			if (stats != null && stats.size() > 0) {
 
 				// Show the webview
@@ -196,6 +195,7 @@ public class FeedStats extends Activity {
 				Toast.makeText(mContext, errorMsg, Toast.LENGTH_LONG).show();
 			}
 			mGetButton.setEnabled(true);			
+			dismissDialog(PROGRESS_DIALOG);			
 		}
 		
 		/**
