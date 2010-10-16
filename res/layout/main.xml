@@ -3,22 +3,28 @@
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 
-	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:orientation="horizontal" android:layout_width="fill_parent"
-		android:layout_height="fill_parent" android:layout_weight="17">
+<RelativeLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content" 
+    android:layout_width="fill_parent">
 
-		<EditText android:layout_height="wrap_content"
-			android:layout_width="fill_parent" android:hint="@string/feed_url"
-			android:id="@+id/feedUrl" android:textSize="14dp" android:inputType="textUri"
-			android:layout_weight="1">
-		</EditText>
-
-		<Button android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:id="@+id/getGraph"
-			android:layout_gravity="right" android:text="@string/get"
-			android:layout_weight="0"></Button>
-	</LinearLayout>
-	
+    <Button 
+        android:id="@+id/getGraph"
+        android:text="@string/get" 
+        android:layout_alignParentRight="true"          
+        android:layout_height="wrap_content" 
+        android:layout_width="wrap_content"
+        />
+    <EditText 
+        android:hint="@string/feed_url"
+        android:id="@+id/feedUrl" 
+        android:textSize="14dp" 
+        android:inputType="textUri" 
+        android:layout_height="wrap_content" 
+        android:layout_width="fill_parent"
+        android:layout_toLeftOf="@id/getGraph" 
+        />
+</RelativeLayout>	
 	<WebView android:id="@+id/wv1" android:layout_height="wrap_content"
-		android:layout_width="fill_parent" android:layout_weight="1" />
+		android:layout_width="fill_parent" />
 </LinearLayout>
