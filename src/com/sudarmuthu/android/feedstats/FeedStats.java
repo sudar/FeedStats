@@ -60,7 +60,7 @@ import com.sudarmuthu.android.feedstats.utils.StatsGraphHandler;
 /**
  * The main activity class
  * 
- * @author "Sudar Muthu"
+ * @author "Sudar Muthu" (http://sudarmuthu.com)
  *
  */
 public class FeedStats extends Activity {
@@ -193,7 +193,6 @@ public class FeedStats extends Activity {
 	 */
     protected void displayAboutBox() {
     	showDialog(ABOUT_DIALOG);
-//        startActivity(new Intent(this, About.class));
     }
     
 	/**

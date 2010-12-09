@@ -30,7 +30,7 @@ import android.util.Log;
 /**
  * Parese the response XML from feedburner
  * 
- * @author "Sudar Muthu (sudarm@)"
+ * @author "Sudar Muthu (http://sudarmuthu.com)"
  *
  */
 public class FeedStatsHandler extends DefaultHandler {
