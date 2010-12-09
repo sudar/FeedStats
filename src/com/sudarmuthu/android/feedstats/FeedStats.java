@@ -68,7 +68,7 @@ public class FeedStats extends Activity {
         mGetButton = (Button) findViewById(R.id.getGraph);
         mContext = this;
         
-        mFeedUrl.setText("http://feeds.feedburner.com/SudarBlogs"); //for debugging
+//        mFeedUrl.setText("http://feeds.feedburner.com/SudarBlogs"); //for debugging
         
         Button getGraph = (Button) findViewById(R.id.getGraph);
         getGraph.setOnClickListener(new OnClickListener() {
