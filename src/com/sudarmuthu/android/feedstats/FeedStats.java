@@ -253,14 +253,19 @@ public class FeedStats extends Activity {
 				
 			} catch (MalformedURLException e) {
 				handleError(e);
+				stats = null;
 			} catch (IOException e) {
 				handleError(e);
+				stats = null;
 			} catch (ParserConfigurationException e) {
 				handleError(e);
+				stats = null;
 			} catch (SAXException e) {
 				handleError(e);
+				stats = null;
 			} catch (Exception e) {
 				handleError(e);
+				stats = null;
 			}
 			
 			return stats;
@@ -296,7 +301,6 @@ public class FeedStats extends Activity {
 		private void handleError(Exception e) {
 			Log.d(this.getClass().getSimpleName(), "Caught some exceiton");
 			e.printStackTrace();
-			Toast.makeText(mContext, mContext.getResources().getString(R.string.error) + "-" + e.getMessage(), Toast.LENGTH_LONG);
 			errorMsg = e.getMessage();
 		}
 	}
